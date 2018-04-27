@@ -1,0 +1,113 @@
+https://groosha.gitbooks.io/telegram-bot-lessons/content/chapter11.html
+
+# -*- coding: utf-8 -*-
+import config
+import telebot
+from telebot import types
+bot = telebot.TeleBot(config.token)
+
+class Struct:
+    def __init__(self,chat_id,NumOmni,Name,phone_number):
+        self.id = chat_id
+        self.Omni = NumOmni
+        self.name = Name
+        self.number = phone_number
+
+
+allmes = []
+CurrFlag = False
+obj = Struct(0, 0, 0, 0)
+
+@bot.message_handler(commands=["Привет"])
+def welcome(message):
+    keybord = types.ReplyKeyboardMarkup()
+    adding = types.KeyboardButton("добавить")
+    show = types.KeyboardButton("Показать всех")
+    keybord.row(adding)
+    keybord.row(show)
+    bot.send_message(message.chat.id,
+                         'привет, {who} {fam},я помогу тебе :)'.format(who=message.from_user.first_name,
+                                                                       fam=message.from_user.last_name))
+    bot.send_message(message.chat.id,'Выбери что ты хочешь сделать',reply_markup=keybord)
+    listAppend(allmes,message)
+
+def fl(flag):
+    return flag
+
+
+def change_fl(flag):
+    flag = not flag
+    return flag
+
+
+
+@bot.message_handler(func=lambda message: True, content_types=['text'])
+def repeat_all_messages(message):  # Название функции не играет никакой роли, в принципе
+    if message.text == "Привет" or message.text == "привет" :
+        welcome(message)
+    elif message.text == "show":
+        ShowAll(allmes,message.chat.id)
+    elif message.text == "добавить":
+        AddingNumber()
+
+
+    # keybord = types.ReplyKeyboardMarkup()
+    # adding = types.KeyboardButton("добавить")
+    # show = types.KeyboardButton("Показать всех")
+    # keybord.row(adding)
+    # keybord.row(show)
+    # if message.text == "show":
+    #     ShowAll(allmes,message.chat.id)
+    # else:
+    #     bot.send_message(message.chat.id,
+    #                      'привет, {who} {fam},я помогу тебе :)'.format(who=message.from_user.first_name,
+    #                                                                    fam=message.from_user.last_name))
+    #     bot.send_message(message.chat.id,'Выбери что ты хочешь сделать',reply_markup=keybord)
+    #     listAppend(allmes,message)
+    #
+    # if message.text == "добавить":
+    #     Adding(message)
+
+
+def NewListCreate():
+    list = []
+    return list
+
+
+def listAppend(list,message):
+    list.append(message.text)
+
+
+def ShowAll(list,idc):
+    bot.send_message(idc, '------all------')
+    for each in allmes:
+        bot.send_message(idc, each)
+    bot.send_message(idc, '---------')
+    print(list),
+
+
+
+@bot.message_handler(func=lambda message: obj.Omni == 0)
+def AddingNumber(message):
+    bot.send_message(message.chat.id,'Введи номер заказа')
+    if not message.text.isdigit():
+        bot.send_message(message.chat.id, "Что-то не так, попробуй ещё раз!")
+        print(obj.Omni)
+        return
+    else:
+        omni = message.text
+        obj.Omni = omni
+        print (omni)
+        print(obj.Omni)
+        change_fl(CurrFlag)
+
+
+
+    # bot.send_message(message.chat.id, 'Введи Фамилию')
+    # fam = message.text
+    # bot.send_message(message.chat.id, 'Введи номер телефона')
+    # phnum = message.text
+    # print(omni,fam,phnum)
+
+if __name__ == '__main__':
+     bot.polling(none_stop=True)
